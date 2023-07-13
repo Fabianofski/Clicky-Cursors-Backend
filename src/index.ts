@@ -1,4 +1,12 @@
 import express from "express";
+import { SaveData } from "./model/SaveData";
+require("dotenv").config();
+
+const API_KEY = process.env.API_KEY;
+const mongo = require("./mongo");
+
+const bodyParser = require("body-parser");
+const jsonParser = bodyParser.json();
 
 const app = express();
 const port = 3000;
@@ -8,7 +16,32 @@ app.get("/", (req, res) => {
   res.send({ uptime: uptime.toFixed(2) + "s" });
 });
 
-app.get("/", (req, res) => {});
+app.post("/api/save", jsonParser, async (req, res) => {
+  const { username, password, apiKey } = req.query;
+
+  if(apiKey !== API_KEY) {
+    res.sendStatus(403);
+    return;
+  }
+
+  const body = req.body as SaveData;
+  const response = await mongo.updateSaveData(body, username, password);
+
+  res.send({response: response})
+});
+
+app.get("/api/load", jsonParser, async (req, res) => {
+  const { username, password } = req.query;
+  const response = await mongo.getSaveData(username, password);
+
+  res.send(response)
+});
+
+app.get("/api/leaderboard", jsonParser, async (req, res) => {
+  const response = await mongo.getLeaderboard();
+
+  res.send(response)
+});
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);

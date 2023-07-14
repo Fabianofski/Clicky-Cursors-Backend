@@ -109,7 +109,18 @@ async function getLeaderboard(): Promise<SaveData[]> {
     const db = client.db("ClickyCursor");
     const collection = db.collection("ClickyCursorData");
 
-    const saveData = await collection.find({}).toArray();
+    const saveData = await collection
+      .find({})
+      .project({
+        _id: 0,
+        coins: 1,
+        displayName: 1,
+        buildingItems: 1,
+        cursorItems: 1,
+        recipeItems: 1,
+      })
+      .sort({ coins: -1 })
+      .toArray();
 
     await client.close();
     return saveData;

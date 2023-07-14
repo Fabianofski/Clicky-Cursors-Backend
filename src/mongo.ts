@@ -22,6 +22,22 @@ async function userExists(displayName: string): Promise<boolean> {
   }
 }
 
+async function login(displayName: string, password: string): Promise<boolean> {
+  try {
+    const client = new MongoClient(uri);
+
+    const db = client.db("ClickyCursor");
+    const collection = db.collection("ClickyCursorData");
+
+    const oldSaveData = (await collection.findOne({
+      displayName: displayName,
+    })) as SaveData;
+    return await bcrypt.compare(password, oldSaveData.password);
+  } catch {
+    return false;
+  }
+}
+
 async function updateSaveData(
   saveData: SaveData,
   displayName: string,
@@ -103,4 +119,10 @@ async function getLeaderboard(): Promise<SaveData[]> {
   return [];
 }
 
-module.exports = { userExists, updateSaveData, getSaveData, getLeaderboard };
+module.exports = {
+  userExists,
+  login,
+  updateSaveData,
+  getSaveData,
+  getLeaderboard,
+};

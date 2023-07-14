@@ -44,6 +44,13 @@ app.get("/api/userExists", jsonParser, async (req, res) => {
   res.send(response);
 });
 
+app.get("/api/login", jsonParser, async (req, res) => {
+  const { username, password } = req.query;
+  const response = await mongo.login(username, password);
+
+  res.send(response);
+});
+
 app.get("/api/leaderboard", jsonParser, async (req, res) => {
   const response = await mongo.getLeaderboard();
 

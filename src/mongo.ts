@@ -3,21 +3,47 @@ import { SaveData } from "./model/SaveData";
 var MongoClient = require("mongodb").MongoClient;
 
 const uri = `mongodb+srv://${process.env.MONGO_AUTH}@${process.env.MONGO_HOST}`;
-const bcrypt = require("bcrypt")
-const saltRounds = 10
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
-async function updateSaveData(saveData: SaveData, displayName: string | undefined = undefined, password: string) : Promise<String> {
+async function userExists(displayName: string): Promise<boolean> {
   try {
     const client = new MongoClient(uri);
 
     const db = client.db("ClickyCursor");
     const collection = db.collection("ClickyCursorData");
 
-    const oldSaveData = await collection.findOne({ displayName: displayName }) as SaveData;
+    const oldSaveData = (await collection.findOne({
+      displayName: displayName,
+    })) as SaveData;
+    return oldSaveData !== null;
+  } catch {
+    return false;
+  }
+}
+
+async function updateSaveData(
+  saveData: SaveData,
+  displayName: string,
+  password: string
+) {
+  try {
+    const client = new MongoClient(uri);
+
+    const db = client.db("ClickyCursor");
+    const collection = db.collection("ClickyCursorData");
+
+    const oldSaveData = (await collection.findOne({
+      displayName: displayName,
+    })) as SaveData;
     if (oldSaveData !== null) {
-      if(await bcrypt.compare(password, oldSaveData.password))
-        await collection.updateOne({ displayName: displayName }, { $set: saveData }, { upsert: true });
-      else return "Access denied!"
+      if (await bcrypt.compare(password, oldSaveData.password))
+        await collection.updateOne(
+          { displayName: displayName },
+          { $set: saveData },
+          { upsert: true }
+        );
+      else return "Access denied!";
     } else {
       saveData.password = await bcrypt.hash(password, saltRounds);
       saveData.displayName = displayName;
@@ -32,17 +58,25 @@ async function updateSaveData(saveData: SaveData, displayName: string | undefine
   }
 }
 
-async function getSaveData(displayName: string, password: string) : Promise<SaveData | null> {
+async function getSaveData(
+  displayName: string,
+  password: string
+): Promise<SaveData | null> {
   try {
     const client = new MongoClient(uri);
 
     const db = client.db("ClickyCursor");
     const collection = db.collection("ClickyCursorData");
 
-    const saveData = await collection.findOne({ displayName: displayName }) as SaveData;
+    const saveData = (await collection.findOne({
+      displayName: displayName,
+    })) as SaveData;
 
     await client.close();
-    if(await bcrypt.compare(password, saveData.password)){
+
+    console.log(await bcrypt.compare(password, saveData.password));
+    if (saveData == null) return null;
+    else if (await bcrypt.compare(password, saveData.password)) {
       saveData.password = undefined;
       return saveData;
     }
@@ -52,7 +86,7 @@ async function getSaveData(displayName: string, password: string) : Promise<Save
   return null;
 }
 
-async function getLeaderboard() : Promise<SaveData[]> {
+async function getLeaderboard(): Promise<SaveData[]> {
   try {
     const client = new MongoClient(uri);
 
@@ -69,4 +103,4 @@ async function getLeaderboard() : Promise<SaveData[]> {
   return [];
 }
 
-module.exports = { updateSaveData, getSaveData, getLeaderboard };
+module.exports = { userExists, updateSaveData, getSaveData, getLeaderboard };

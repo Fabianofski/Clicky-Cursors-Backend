@@ -5,4 +5,5 @@ export interface SaveData {
   buildingItems: { [key: string]: number };
   cursorItems: { [key: string]: number };
   recipeItems: { [key: string]: number };
+  timestamp: Date;
 }

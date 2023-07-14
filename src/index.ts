@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 app.post("/api/save", jsonParser, async (req, res) => {
   const { username, password, apiKey } = req.query;
 
-  if(apiKey !== API_KEY) {
+  if (apiKey !== API_KEY) {
     res.sendStatus(403);
     return;
   }
@@ -27,20 +27,27 @@ app.post("/api/save", jsonParser, async (req, res) => {
   const body = req.body as SaveData;
   const response = await mongo.updateSaveData(body, username, password);
 
-  res.send({response: response})
+  res.send({ response: response });
 });
 
 app.get("/api/load", jsonParser, async (req, res) => {
   const { username, password } = req.query;
   const response = await mongo.getSaveData(username, password);
 
-  res.send(response)
+  res.send(response);
+});
+
+app.get("/api/userExists", jsonParser, async (req, res) => {
+  const { username } = req.query;
+  const response = await mongo.userExists(username);
+
+  res.send(response);
 });
 
 app.get("/api/leaderboard", jsonParser, async (req, res) => {
   const response = await mongo.getLeaderboard();
 
-  res.send(response)
+  res.send(response);
 });
 
 app.listen(port, () => {

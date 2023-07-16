@@ -2,7 +2,7 @@ import { SaveData } from "./model/SaveData";
 
 var MongoClient = require("mongodb").MongoClient;
 
-const uri = `mongodb+srv://${process.env.MONGO_AUTH}@${process.env.MONGO_HOST}`;
+const uri = `mongodb://${process.env.MONGO_AUTH}@${process.env.MONGO_HOST}`;
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 

@@ -21,6 +21,11 @@ app.get("/clicky-cursors", (req, res) => {
 app.post("/clicky-cursors/api/save", jsonParser, async (req, res) => {
   const { username, password } = req.query;
 
+  if (username == "" || password == "") {
+    res.sendStatus(422);
+    return;
+  }
+
   const body = req.body as SaveData;
   const response = await mongo.updateSaveData(body, username, password);
 

@@ -2,7 +2,6 @@ import express from "express";
 import { SaveData } from "./model/SaveData";
 require("dotenv").config();
 
-const API_KEY = process.env.API_KEY;
 const mongo = require("./mongo");
 
 const bodyParser = require("body-parser");
@@ -17,12 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/save", jsonParser, async (req, res) => {
-  const { username, password, apiKey } = req.query;
-
-  if (apiKey !== API_KEY) {
-    res.sendStatus(403);
-    return;
-  }
+  const { username, password } = req.query;
 
   const body = req.body as SaveData;
   const response = await mongo.updateSaveData(body, username, password);

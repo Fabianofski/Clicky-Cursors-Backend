@@ -10,6 +10,9 @@ const jsonParser = bodyParser.json();
 const app = express();
 const port = 3000;
 
+const cors = require("cors");
+app.use(cors());
+
 app.get("/clicky-cursors", (req, res) => {
   const uptime = process.uptime(); // Uptime in Sekunden
   res.send({ uptime: uptime.toFixed(2) + "s" });

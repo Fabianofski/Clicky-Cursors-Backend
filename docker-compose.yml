@@ -1,0 +1,28 @@
+services:
+
+  mongodb:
+    image: mongo:latest
+    restart: unless-stopped
+    ports:
+      - '27017:27017'
+    env_file: .env
+    command: [--auth]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: "./"
+    volumes:
+      - /app/node_modules
+      - ./:/app
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_HOST: "mongodb:27017"
+      NODE_ENV: "PRODUCTION"

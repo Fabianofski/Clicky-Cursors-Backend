@@ -63,6 +63,7 @@ async function updateSaveData(
     } else {
       saveData.password = await bcrypt.hash(password, saltRounds);
       saveData.displayName = displayName;
+      saveData.coins = BigInt(10);
       await collection.insertOne(saveData);
     }
 

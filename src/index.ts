@@ -10,12 +10,12 @@ const jsonParser = bodyParser.json();
 const app = express();
 const port = 3000;
 
-app.get("/", (req, res) => {
+app.get("/clicky-cursors", (req, res) => {
   const uptime = process.uptime(); // Uptime in Sekunden
   res.send({ uptime: uptime.toFixed(2) + "s" });
 });
 
-app.post("/api/save", jsonParser, async (req, res) => {
+app.post("/clicky-cursors/api/save", jsonParser, async (req, res) => {
   const { username, password } = req.query;
 
   const body = req.body as SaveData;
@@ -24,28 +24,28 @@ app.post("/api/save", jsonParser, async (req, res) => {
   res.send({ response: response });
 });
 
-app.get("/api/load", jsonParser, async (req, res) => {
+app.get("/clicky-cursors/api/load", jsonParser, async (req, res) => {
   const { username, password } = req.query;
   const response = await mongo.getSaveData(username, password);
 
   res.send(response);
 });
 
-app.get("/api/userExists", jsonParser, async (req, res) => {
+app.get("/clicky-cursors/api/userExists", jsonParser, async (req, res) => {
   const { username } = req.query;
   const response = await mongo.userExists(username);
 
   res.send(response);
 });
 
-app.get("/api/login", jsonParser, async (req, res) => {
+app.get("/clicky-cursors/api/login", jsonParser, async (req, res) => {
   const { username, password } = req.query;
   const response = await mongo.login(username, password);
 
   res.send(response);
 });
 
-app.get("/api/leaderboard", jsonParser, async (req, res) => {
+app.get("/clicky-cursors/api/leaderboard", jsonParser, async (req, res) => {
   const response = await mongo.getLeaderboard();
 
   res.send(response);

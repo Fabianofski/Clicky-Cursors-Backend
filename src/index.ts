@@ -14,14 +14,35 @@ const cors = require("cors");
 app.use(cors());
 
 app.get("/clicky-cursors", (req, res) => {
-  const uptime = process.uptime(); // Uptime in Sekunden
+  const uptime = process.uptime();
   res.send({ uptime: uptime.toFixed(2) + "s" });
 });
 
-app.post("/clicky-cursors/api/save", jsonParser, async (req, res) => {
-  const { username, password } = req.query;
+function getUsernameAndPassword(req: any): {
+  username: string;
+  password: string;
+} {
+  try {
+    let username, password;
+    if (req.headers.authorization) {
+      const base64Credentials = req.headers.authorization.split(" ")[1];
+      const credentials = Buffer.from(base64Credentials, "base64").toString(
+        "utf8"
+      );
+      [username, password] = credentials.split(":");
+    } else {
+      username = req.query.username;
+      password = req.query.password;
+    }
+    return { username: username || "", password: password || "" };
+  } catch {
+    return { username: "", password: "" };
+  }
+}
 
-  if (username == "" || password == "") {
+app.post("/clicky-cursors/api/save", jsonParser, async (req, res) => {
+  const { username, password } = getUsernameAndPassword(req);
+  if (username === "" || password === "") {
     res.sendStatus(422);
     return;
   }
@@ -33,7 +54,12 @@ app.post("/clicky-cursors/api/save", jsonParser, async (req, res) => {
 });
 
 app.get("/clicky-cursors/api/load", jsonParser, async (req, res) => {
-  const { username, password } = req.query;
+  const { username, password } = getUsernameAndPassword(req);
+  if (username === "" || password === "") {
+    res.sendStatus(422);
+    return;
+  }
+
   const response = await mongo.getSaveData(username, password);
 
   res.send(response);
@@ -47,9 +73,13 @@ app.get("/clicky-cursors/api/userExists", jsonParser, async (req, res) => {
 });
 
 app.get("/clicky-cursors/api/login", jsonParser, async (req, res) => {
-  const { username, password } = req.query;
-  const response = await mongo.login(username, password);
+  const { username, password } = getUsernameAndPassword(req);
+  if (username === "" || password === "") {
+    res.sendStatus(422);
+    return;
+  }
 
+  const response = await mongo.login(username, password);
   res.send(response);
 });
 
